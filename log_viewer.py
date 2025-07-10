@@ -12,6 +12,8 @@ class LogViewer(tk.Tk):
 
         self.text_area = scrolledtext.ScrolledText(self, state='disabled', wrap=tk.WORD)
         self.text_area.pack(expand=True, fill='both')
+        self.auto_scroll = True
+        self.text_area['yscrollcommand'] = self._on_scroll
 
         menubar = tk.Menu(self)
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -45,6 +47,7 @@ class LogViewer(tk.Tk):
         self.thread = threading.Thread(target=self._follow, daemon=True)
         self.thread.start()
         self.title(f"Streaming Log Viewer - {os.path.basename(filepath)}")
+        self.auto_scroll = True
 
     def stop_stream(self):
         if self.thread and self.thread.is_alive():
@@ -74,8 +77,13 @@ class LogViewer(tk.Tk):
     def _append_text(self, text):
         self.text_area.configure(state='normal')
         self.text_area.insert(tk.END, text)
-        self.text_area.see(tk.END)
+        if self.auto_scroll:
+            self.text_area.see(tk.END)
         self.text_area.configure(state='disabled')
+
+    def _on_scroll(self, first, last):
+        self.text_area.vbar.set(first, last)
+        self.auto_scroll = float(last) >= 0.999
 
     def quit(self):
         self.stop_stream()
