@@ -6,7 +6,7 @@ This is a small GUI application for viewing log files as they are written. It is
 * Select a log file from a file dialog.
 * Display existing log content and automatically append new lines as they are written.
 * Continue streaming until you select a new file or close the program.
-* Pause and resume streaming so you can examine the log without new lines
+* Pause and resume streaming so you can inspect the log without new lines
   shifting the view.
 
 ## Requirements
@@ -29,7 +29,6 @@ pyinstaller --onefile --windowed log_viewer.py
 The executable will be placed in the `dist` directory.
 
 ## Pausing Streaming
-Use the **Pause** button at the bottom of the window to temporarily stop reading
-the active log file. This allows you to scroll and inspect previous lines
-without new log entries moving the view. Click **Resume** to continue streaming
-from the point where you paused.
+Use the **Pause** button at the bottom of the window to temporarily stop
+reading the active log file. Click **Resume** to continue streaming from
+the point where you paused.

@@ -12,8 +12,11 @@ class LogViewer(tk.Tk):
 
         self.text_area = scrolledtext.ScrolledText(self, state='disabled', wrap=tk.WORD)
         self.text_area.pack(expand=True, fill='both')
-        self.auto_scroll = True
-        self.text_area['yscrollcommand'] = self._on_scroll
+
+        control_frame = tk.Frame(self)
+        control_frame.pack(fill='x', side='bottom')
+        self.pause_button = tk.Button(control_frame, text="Pause", command=self.toggle_pause)
+        self.pause_button.pack(side='right', padx=5, pady=5)
 
         menubar = tk.Menu(self)
         file_menu = tk.Menu(menubar, tearoff=0)
@@ -21,11 +24,6 @@ class LogViewer(tk.Tk):
         file_menu.add_command(label="Exit", command=self.quit)
         menubar.add_cascade(label="File", menu=file_menu)
         self.config(menu=menubar)
-
-        control_frame = tk.Frame(self)
-        control_frame.pack(fill='x', side='bottom')
-        self.pause_button = tk.Button(control_frame, text="Pause", command=self.toggle_pause)
-        self.pause_button.pack(side='right', padx=5, pady=5)
 
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
@@ -55,7 +53,6 @@ class LogViewer(tk.Tk):
         self.thread = threading.Thread(target=self._follow, daemon=True)
         self.thread.start()
         self.title(f"Streaming Log Viewer - {os.path.basename(filepath)}")
-        self.auto_scroll = True
 
     def stop_stream(self):
         if self.thread and self.thread.is_alive():
@@ -67,6 +64,8 @@ class LogViewer(tk.Tk):
             except Exception:
                 pass
             self.log_file = None
+        self.pause_event.clear()
+        self.pause_button.config(text="Pause")
 
     def toggle_pause(self):
         if not self.thread:
@@ -98,13 +97,8 @@ class LogViewer(tk.Tk):
     def _append_text(self, text):
         self.text_area.configure(state='normal')
         self.text_area.insert(tk.END, text)
-        if self.auto_scroll:
-            self.text_area.see(tk.END)
+        self.text_area.see(tk.END)
         self.text_area.configure(state='disabled')
-
-    def _on_scroll(self, first, last):
-        self.text_area.vbar.set(first, last)
-        self.auto_scroll = float(last) >= 0.999
 
     def quit(self):
         self.stop_stream()
