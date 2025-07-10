@@ -4,7 +4,8 @@ This is a small GUI application for viewing log files as they are written. It is
 
 ## Features
 * Select a log file from a file dialog.
-* Display existing log content and automatically append new lines as they are written.
+* Display log content with the newest lines at the top of the window.
+* Automatically stream new lines as they are written while older entries load lazily.
 * Continue streaming until you select a new file or close the program.
 * Pause and resume streaming so you can inspect the log without new lines
   shifting the view.
