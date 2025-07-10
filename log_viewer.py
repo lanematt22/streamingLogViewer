@@ -32,7 +32,8 @@ class LogViewer(tk.Tk):
         self.history_thread = None
         self.history_file = None
         self.history_pos = 0
-        self.initial_lines = 200
+        # Load roughly 100 recent lines first
+        self.initial_lines = 100
         self.history_chunk_lines = 500
         self.filepath = None
 
@@ -124,9 +125,11 @@ class LogViewer(tk.Tk):
         self.text_area.configure(state='disabled')
 
     def _insert_bottom(self, text):
+        # Preserve the current view position while inserting at the end
         self.text_area.configure(state='normal')
+        yview = self.text_area.yview()
         self.text_area.insert(tk.END, text)
-        self.text_area.see(tk.END)
+        self.text_area.yview_moveto(yview[0])
         self.text_area.configure(state='disabled')
 
     def _read_last_lines(self, filepath, num_lines=100, chunk_size=4096):
