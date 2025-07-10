@@ -22,7 +22,13 @@ class LogViewer(tk.Tk):
         menubar.add_cascade(label="File", menu=file_menu)
         self.config(menu=menubar)
 
+        control_frame = tk.Frame(self)
+        control_frame.pack(fill='x', side='bottom')
+        self.pause_button = tk.Button(control_frame, text="Pause", command=self.toggle_pause)
+        self.pause_button.pack(side='right', padx=5, pady=5)
+
         self.stop_event = threading.Event()
+        self.pause_event = threading.Event()
         self.thread = None
         self.log_file = None
 
@@ -44,6 +50,8 @@ class LogViewer(tk.Tk):
         self.text_area.delete(1.0, tk.END)
         self.text_area.configure(state='disabled')
         self.stop_event.clear()
+        self.pause_event.clear()
+        self.pause_button.config(text="Pause")
         self.thread = threading.Thread(target=self._follow, daemon=True)
         self.thread.start()
         self.title(f"Streaming Log Viewer - {os.path.basename(filepath)}")
@@ -60,12 +68,25 @@ class LogViewer(tk.Tk):
                 pass
             self.log_file = None
 
+    def toggle_pause(self):
+        if not self.thread:
+            return
+        if self.pause_event.is_set():
+            self.pause_event.clear()
+            self.pause_button.config(text="Pause")
+        else:
+            self.pause_event.set()
+            self.pause_button.config(text="Resume")
+
     def _follow(self):
         f = self.log_file
         # Read existing contents first
         for line in f:
             self._append_text(line)
         while not self.stop_event.is_set():
+            if self.pause_event.is_set():
+                time.sleep(0.1)
+                continue
             where = f.tell()
             line = f.readline()
             if not line:
